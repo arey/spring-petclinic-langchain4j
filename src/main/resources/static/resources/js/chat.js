@@ -142,62 +142,37 @@ let isListening = false;
 function initializeSpeechRecognition() {
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
+        recognition.continuous = false;
         recognition.interimResults = true;
         
         const browserLang = navigator.language || navigator.userLanguage;
         recognition.lang = browserLang || 'en-US';
 
         let finalTranscript = '';
-        let interimTranscript = '';
-        let lastInterimTranscript = '';
-        let silenceTimer = null;
-        const SILENCE_DURATION = 2000;
-
+        
         recognition.onresult = function(event) {
-            if (silenceTimer) {
-                clearTimeout(silenceTimer);
-            }
-            
-            interimTranscript = '';
-            
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    // Avoid duplication if final text is similar to last interim text
-                    if (transcript !== lastInterimTranscript) {
-                        finalTranscript += transcript;
-                    }
-                    lastInterimTranscript = '';
-                    
-                    silenceTimer = setTimeout(() => {
-                        if (isListening) {
-                            recognition.stop();
-                        }
-                    }, SILENCE_DURATION);
-                } else {
-                    interimTranscript = transcript;
-                    lastInterimTranscript = transcript;
-                }
-            }
-            
             const input = document.getElementById('chatbox-input');
-            input.value = finalTranscript + interimTranscript;
+            const lastResult = event.results[event.results.length - 1];
+            
+            if (lastResult.isFinal) {
+                finalTranscript = lastResult[0].transcript;
+                input.value = finalTranscript;
+                recognition.stop();
+            } else {
+                input.value = finalTranscript + lastResult[0].transcript;
+            }
         };
 
         recognition.onend = function() {
-            if (silenceTimer) {
-                clearTimeout(silenceTimer);
-            }
             const input = document.getElementById('chatbox-input');
             if (input.value.trim()) {
-                sendMessage();
+                setTimeout(() => {
+                    sendMessage();
+                }, 100);
             }
             toggleMicrophoneButton(false);
             isListening = false;
             finalTranscript = '';
-            interimTranscript = '';
-            lastInterimTranscript = '';
         };
 
         recognition.onerror = function(event) {
