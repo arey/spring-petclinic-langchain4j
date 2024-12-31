@@ -134,3 +134,125 @@ function uuidv4() {
             return v.toString(16);
         });
 }
+
+let recognition = null;
+let isListening = false;
+
+function initializeSpeechRecognition() {
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        
+        const browserLang = navigator.language || navigator.userLanguage;
+        recognition.lang = browserLang || 'en-US';
+
+        let finalTranscript = '';
+        let interimTranscript = '';
+        let lastInterimTranscript = '';
+        let silenceTimer = null;
+        const SILENCE_DURATION = 2000;
+
+        recognition.onresult = function(event) {
+            if (silenceTimer) {
+                clearTimeout(silenceTimer);
+            }
+            
+            interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    // Avoid duplication if final text is similar to last interim text
+                    if (transcript !== lastInterimTranscript) {
+                        finalTranscript += transcript;
+                    }
+                    lastInterimTranscript = '';
+                    
+                    silenceTimer = setTimeout(() => {
+                        if (isListening) {
+                            recognition.stop();
+                        }
+                    }, SILENCE_DURATION);
+                } else {
+                    interimTranscript = transcript;
+                    lastInterimTranscript = transcript;
+                }
+            }
+            
+            const input = document.getElementById('chatbox-input');
+            input.value = finalTranscript + interimTranscript;
+        };
+
+        recognition.onend = function() {
+            if (silenceTimer) {
+                clearTimeout(silenceTimer);
+            }
+            const input = document.getElementById('chatbox-input');
+            if (input.value.trim()) {
+                sendMessage();
+            }
+            toggleMicrophoneButton(false);
+            isListening = false;
+            finalTranscript = '';
+            interimTranscript = '';
+            lastInterimTranscript = '';
+        };
+
+        recognition.onerror = function(event) {
+            const userElements = prepareMessage('bot');
+            let errorMessage = 'Speech recognition error: ';
+            
+            switch(event.error) {
+                case 'network':
+                    errorMessage += 'Network error occurred';
+                    break;
+                case 'no-speech':
+                    errorMessage += 'No speech was detected';
+                    break;
+                case 'not-allowed':
+                    errorMessage += 'Microphone access was denied';
+                    break;
+                default:
+                    errorMessage += 'An unknown error occurred';
+            }
+            
+            displayMessage(errorMessage, userElements);
+            toggleMicrophoneButton(false);
+        };
+    } else {
+        const userElements = prepareMessage('bot');
+        displayMessage('Speech recognition is not supported by your browser. Please try using a modern browser like Chrome.', userElements);
+    }
+}
+
+function toggleSpeechRecognition() {
+    if (!recognition) {
+        initializeSpeechRecognition();
+    }
+
+    if (!isListening) {
+        try {
+            recognition.start();
+            isListening = true;
+            toggleMicrophoneButton(true);
+        } catch (error) {
+            const userElements = prepareMessage('bot');
+            displayMessage('Could not start speech recognition. Please make sure you have granted microphone permissions.', userElements);
+            toggleMicrophoneButton(false);
+        }
+    } else {
+        recognition.stop();
+        isListening = false;
+        toggleMicrophoneButton(false);
+    }
+}
+
+function toggleMicrophoneButton(isActive) {
+    const micButton = document.getElementById('mic-button');
+    if (isActive) {
+        micButton.classList.add('active');
+    } else {
+        micButton.classList.remove('active');
+    }
+}
