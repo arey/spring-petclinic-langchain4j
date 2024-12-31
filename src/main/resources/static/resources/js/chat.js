@@ -104,10 +104,11 @@ async function displayBotReply(response) {
     }
 }
 
-function handleKeyPress(event) {
-    if (event.key === "Enter") {
-        event.preventDefault(); // Prevents adding a newline
-        sendMessage(); // Send the message when Enter is pressed
+function handleKeyDown(event) {
+    // If it's the Enter key without the Shift key
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Prevents line feed
+        sendMessage();
     }
 }
 

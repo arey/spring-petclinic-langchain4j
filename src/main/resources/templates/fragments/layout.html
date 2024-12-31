@@ -96,7 +96,11 @@
         <!-- Chat messages will be dynamically inserted here -->
       </div>
       <div id="chatbox-input-container">
-        <textarea id="chatbox-input" rows="1" onkeypress="handleKeyPress(event)"></textarea>
+        <textarea 
+          id="chatbox-input" 
+          rows="1" 
+          onkeydown="handleKeyDown(event)"
+          placeholder="Enter your message..."></textarea>
         <button onclick="sendMessage()" class="btn btn-primary">
             <i class="fa fa-paper-plane"></i>
         </button>
