@@ -3,7 +3,7 @@ package org.springframework.samples.petclinic.chat;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.rag.DefaultRetrievalAugmentor;
@@ -42,9 +42,9 @@ class AssistantConfiguration {
 	}
 
 	@Bean
-	RetrievalAugmentor retrievalAugmentor(ChatLanguageModel chatLanguageModel, ContentRetriever vetContentRetriever) {
+	RetrievalAugmentor retrievalAugmentor(ChatModel chatModel, ContentRetriever vetContentRetriever) {
 		return DefaultRetrievalAugmentor.builder()
-			.queryRouter(new VetQueryRouter(chatLanguageModel, vetContentRetriever))
+			.queryRouter(new VetQueryRouter(chatModel, vetContentRetriever))
 			.build();
 	}
 

@@ -1,7 +1,7 @@
 package org.springframework.samples.petclinic.chat;
 
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
@@ -43,10 +43,10 @@ class VetQueryRouter implements QueryRouter {
 
 	private final ContentRetriever vetContentRetriever;
 
-	private final ChatLanguageModel chatLanguageModel;
+	private final ChatModel chatModel;
 
-	public VetQueryRouter(ChatLanguageModel chatLanguageModel, ContentRetriever vetContentRetriever) {
-		this.chatLanguageModel = chatLanguageModel;
+	public VetQueryRouter(ChatModel chatModel, ContentRetriever vetContentRetriever) {
+		this.chatModel = chatModel;
 		this.vetContentRetriever = vetContentRetriever;
 	}
 
@@ -54,7 +54,7 @@ class VetQueryRouter implements QueryRouter {
 	public Collection<ContentRetriever> route(Query query) {
 		Prompt prompt = PROMPT_TEMPLATE.apply(query.text());
 
-		AiMessage aiMessage = chatLanguageModel.chat(prompt.toUserMessage()).aiMessage();
+		AiMessage aiMessage = chatModel.chat(prompt.toUserMessage()).aiMessage();
 		LOGGER.debug("LLM decided: {}", aiMessage.text());
 
 		if (aiMessage.text().toLowerCase().contains("yes")) {
