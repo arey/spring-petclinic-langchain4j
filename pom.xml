@@ -38,8 +38,20 @@
     <maven-checkstyle.version>3.6.0</maven-checkstyle.version>
     <nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
     <spring-format.version>0.0.43</spring-format.version>
-    <langchain4j.version>1.0.0-beta3</langchain4j.version>
+    <langchain4j.version>1.7.1</langchain4j.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-bom</artifactId>
+        <version>${langchain4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- Spring and Spring Boot dependencies -->
@@ -77,12 +89,10 @@
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j-spring-boot-starter</artifactId>
-      <version>${langchain4j.version}</version>
     </dependency>
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
-      <version>${langchain4j.version}</version>
     </dependency>
 
     <dependency>
@@ -486,7 +496,6 @@
         <dependency>
           <groupId>dev.langchain4j</groupId>
           <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
-          <version>${langchain4j.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -496,7 +505,6 @@
         <dependency>
           <groupId>dev.langchain4j</groupId>
           <artifactId>langchain4j-azure-open-ai-spring-boot-starter</artifactId>
-          <version>${langchain4j.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -506,7 +514,6 @@
         <dependency>
           <groupId>dev.langchain4j</groupId>
           <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
-          <version>${langchain4j.version}</version>
         </dependency>
       </dependencies>
     </profile>
